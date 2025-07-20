@@ -139,6 +139,11 @@ impl AlgSet {
     pub fn parse_scramble(text: &str) -> Result<Vec<Movement>, RubiksError> {
         let mut scramble: Vec<Movement> = Vec::new();
 
+        let mut text = text.to_string();
+
+        // TODO: Add proper parenthesis support
+        text.retain(|c| c != '(' && c != ')');
+
         for tk in text.split(' ').filter(|tk| tk.len() > 0) {
             match Movement::from_text(tk) {
                 Some(movement) => scramble.push(movement),
@@ -158,9 +163,7 @@ impl AlgSet {
         let mut scrambles: Vec<Vec<Movement>> = Vec::new();
 
         for line in text.lines() {
-            if line.starts_with("#") {
-                continue;
-            }
+            let line = line.split('#').nth(0).unwrap();
             let line: String = line.chars().map(|c| match c {'’' => '\'', c => c}).collect();
             let mut is_whitespace = true;
             for chr in line.chars() {

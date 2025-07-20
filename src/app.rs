@@ -105,7 +105,8 @@ enum AppPage<'a> {
     },
     Train {
         algs: Vec<&'a AlgSet>,
-        scramble: String,
+        scrambles: Vec<String>,
+        idx: usize,
     },
 }
 
@@ -134,9 +135,6 @@ pub fn get_scramble<'a>(algsets: &'a [&'a AlgSet]) -> String {
 
 impl<'a> AppPage<'a> {
     pub fn handle_key(&mut self, app: &mut App<'a>, key: KeyEvent) {
-        if let KeyCode::Char('q') = key.code {
-            app.exit = true;
-        }
         match self {
             AppPage::Setup { state, algset_map, .. } => {
                 match key.code {
@@ -158,19 +156,42 @@ impl<'a> AppPage<'a> {
                                     let scramble = get_scramble(&algs);
                                     app.page = AppPage::Train {
                                         algs,
-                                        scramble,
+                                        scrambles: vec![scramble],
+                                        idx: 0,
                                     };
                                 }
                             }
                         }
                     }
+                    KeyCode::Char('q') => {
+                        app.exit = true;
+                    }
                     _ => {}
                 }
             }
-            AppPage::Train {scramble, algs, ..} => {
+            AppPage::Train {scrambles, idx, algs, ..} => {
                 match key.code {
-                    KeyCode::Enter | KeyCode::Char(' ') => {
-                        *scramble = get_scramble(&algs);
+                    KeyCode::Enter | KeyCode::Char(' ' | 'l' | 'j') | KeyCode::Right  => {
+                        if *idx == scrambles.len()-1 {
+                            let mut scramble = "".to_string();
+
+                            while scramble == "".to_string() || scramble == *scrambles.last().unwrap() {
+                                scramble = get_scramble(&algs);
+                            }
+                            
+                            scrambles.push(scramble);
+                            *idx += 1;
+                        } else {
+                            *idx += 1;
+                        }
+                    }
+                    KeyCode::Char('q') => {
+                        *app = App::new(app.db); 
+                    }
+                    KeyCode::Left | KeyCode::Char('h' | 'k') => {
+                        if *idx > 0 {
+                            *idx -= 1;
+                        }
                     }
                     _ => {},
                 }
@@ -221,8 +242,8 @@ impl<'a> AppPage<'a> {
                 let widget = Tree::new(&entries).unwrap().highlight_symbol("> ");
                 frame.render_stateful_widget(widget, frame.area(), state);
             }
-            AppPage::Train {scramble, ..} => {
-                let text = scramble.to_text();
+            AppPage::Train {scrambles, idx, ..} => {
+                let text = scrambles[*idx].to_text();
 
                 text.render(frame.area(), frame.buffer_mut());
             }
