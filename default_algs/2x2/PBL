@@ -1,0 +1,14 @@
+# Jperm
+R U R' F' R U R' U' R' F R2 U' R'
+
+# One bar
+R U' R F2 R' U R' # Front
+R' U R' F2 R F' R # Back
+F' R U' R2 U R' F # Left
+F R' F L2 F' R F' # Right
+
+# Two bars
+R2 U' B2 U2 R2 U' R2 # Front
+R2 U' R2 U2 F2 U' R2 # Back
+F2 U' R2 U2 F2 U' F2 # Left
+F2 U' F2 U2 R2 U' R2 # Right
